@@ -15,39 +15,8 @@ import GiftedListView from 'react-native-gifted-listview';
 
 
 var HTMLParser = require('fast-html-parser');
+var SinaParser = require('./SinaHtmlParser');
 
-/**
-* get href attribute from attribute listView
-* @param {string} values
-**/
-function getHrefAttribute(values) {
-   var attributes = values.split(' ');
-   var i;
-   for(i = 0; i < attributes.length; i++){
-      var pair = attributes[i].split('=');
-      if(pair[0] == 'href'){
-        return pair[1];
-      }
-   }
-   return '';
-}
-
-/**
-* @param {Object} body
-**/
-function parseHtmlNewBlock(body){
-  var rowArrays = [];
-  var children = body.removeWhitespace().childNodes;
-  children.forEach(function(child){
-    var pair = {
-      'title' : child.childNodes[0].rawText,
-      'ref' : getHrefAttribute(child.rawAttrs)
-    };
-    rowArrays.push(pair);
-  });
-
-  return rowArrays;
-}
 
 class Main extends Component {
   constructor(props){
@@ -63,9 +32,8 @@ class Main extends Component {
           var root = HTMLParser.parse(data);
           var newsBodies = root.querySelector('.blk12').removeWhitespace();
           newsBodies.childNodes.forEach(function(body){
-            rows = rows.concat(parseHtmlNewBlock(body));
+            rows = rows.concat(SinaParser.parseHtmlNewBlock(body));
           });
-          Alert.alert('rows length ' + rows.length);
           callback(rows);
         });
   }
@@ -94,11 +62,11 @@ class Main extends Component {
         <GiftedListView
           rowView={this._renderRow}
           onFetch={this._onFetch}
-          //refreshable={true}
+          refreshable={true}
 
           ref='listView'
           onEndReached={this._onEndReached.bind(this)}
-          // onEndReachedThreshold={25}
+          onEndReachedThreshold={25}
            />
       </View>
     );
